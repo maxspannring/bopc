@@ -36,8 +36,10 @@ def compute_julia_set_sequential(xmin, xmax, ymin, ymax, im_width, im_height, c)
 
     return julia
 
-def compute_julia_worker(xmin, xmax, ymin, ymax, im_width, im_height, c,
-                         patch_x_start, patch_x_end, patch_y_start, patch_y_end):
+def compute_julia_worker(args):
+    (xmin, xmax, ymin, ymax, im_width, im_height, c,
+     patch_x_start, patch_x_end, patch_y_start, patch_y_end) = args
+
     zabs_max = 10
     nit_max = 300
 
@@ -51,42 +53,31 @@ def compute_julia_worker(xmin, xmax, ymin, ymax, im_width, im_height, c,
     for ix in range(patch_x_start, patch_x_end):
         for iy in range(patch_y_start, patch_y_end):
             nit = 0
-            # Global pixel position -> point in the complex plane
             z = complex(ix / im_width * xwidth + xmin,
                         iy / im_height * yheight + ymin)
             while abs(z) <= zabs_max and nit < nit_max:
                 z = z ** 2 + c
                 nit += 1
-            ratio = nit / nit_max
-            # Write using LOCAL indices into the small patch array
-            patch_result[ix - patch_x_start, iy - patch_y_start] = ratio
-    return patch_result
+            patch_result[ix - patch_x_start, iy - patch_y_start] = nit / nit_max
+
+    # Return bounds alongside the patch so the caller knows where it goes.
+    return patch_x_start, patch_x_end, patch_y_start, patch_y_end, patch_result
+
 
 # patch describes the (maximum) width/height of the patch
 def compute_julia_in_parallel(size, xmin, xmax, ymin, ymax, patch, nprocs, c):
-    julia = np.zeros((size, size))
     task_list = []
     for x in range(0, size, patch):
-        x_start = x
         x_end = min(x + patch, size)
         for y in range(0, size, patch):
-            y_start = y
             y_end = min(y + patch, size)
-            task_list.append([x_start, x_end, y_start, y_end])
-            print(task_list[-1])
+            task_list.append((xmin, xmax, ymin, ymax, size, size, c,
+                              x, x_end, y, y_end))
+    julia = np.zeros((size, size))
 
-    for task in task_list:
-        res = compute_julia_worker(xmin, xmax, ymin, ymax, size, size, c, task[0], task[1], task[2], task[3])
-        x_start = task[0]
-        x_end = task[1]
-        y_start = task[2]
-        y_end = task[3]
-        julia[x_start:x_end, y_start:y_end] = res
-
-
-    # pool = Pool(nprocs)
-    # restults = pool.map(task, items)
-    # pool.close()
+    with Pool(nprocs) as pool:
+        for x_start, x_end, y_start, y_end, res in pool.map(compute_julia_worker, task_list):
+            julia[x_start:x_end, y_start:y_end] = res
     return julia
 
 
