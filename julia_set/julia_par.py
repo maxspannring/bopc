@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 from re import U
 import numpy as np
 import argparse
@@ -15,7 +14,6 @@ GROUP_NUMBER = 1
 BENCHMARK_C = complex(-0.2, -0.65)
 
 def compute_julia_set_sequential(xmin, xmax, ymin, ymax, im_width, im_height, c):
-
     zabs_max = 10
     nit_max = 300
 
@@ -38,13 +36,60 @@ def compute_julia_set_sequential(xmin, xmax, ymin, ymax, im_width, im_height, c)
 
     return julia
 
+def compute_julia_worker(xmin, xmax, ymin, ymax, im_width, im_height, c,
+                         patch_x_start, patch_x_end, patch_y_start, patch_y_end):
+    zabs_max = 10
+    nit_max = 300
+
+    xwidth = xmax - xmin
+    yheight = ymax - ymin
+
+    patch_w = patch_x_end - patch_x_start
+    patch_h = patch_y_end - patch_y_start
+    patch_result = np.zeros((patch_w, patch_h))
+
+    for ix in range(patch_x_start, patch_x_end):
+        for iy in range(patch_y_start, patch_y_end):
+            nit = 0
+            # Global pixel position -> point in the complex plane
+            z = complex(ix / im_width * xwidth + xmin,
+                        iy / im_height * yheight + ymin)
+            while abs(z) <= zabs_max and nit < nit_max:
+                z = z ** 2 + c
+                nit += 1
+            ratio = nit / nit_max
+            # Write using LOCAL indices into the small patch array
+            patch_result[ix - patch_x_start, iy - patch_y_start] = ratio
+    return patch_result
+
+# patch describes the (maximum) width/height of the patch
 def compute_julia_in_parallel(size, xmin, xmax, ymin, ymax, patch, nprocs, c):
+    julia = np.zeros((size, size))
+    task_list = []
+    for x in range(0, size, patch):
+        x_start = x
+        x_end = min(x + patch, size)
+        for y in range(0, size, patch):
+            y_start = y
+            y_end = min(y + patch, size)
+            task_list.append([x_start, x_end, y_start, y_end])
+            print(task_list[-1])
 
-    # replace the following code
-    # with a parallel version
-    julia_img = compute_julia_set_sequential(xmin, xmax, ymin, ymax, size, size, c)
+    for task in task_list:
+        res = compute_julia_worker(xmin, xmax, ymin, ymax, size, size, c, task[0], task[1], task[2], task[3])
+        x_start = task[0]
+        x_end = task[1]
+        y_start = task[2]
+        y_end = task[3]
+        julia[x_start:x_end, y_start:y_end] = res
 
-    return julia_img
+
+    # pool = Pool(nprocs)
+    # restults = pool.map(task, items)
+    # pool.close()
+    return julia
+
+
 
 
 if __name__ == "__main__":
