@@ -76,7 +76,7 @@ def compute_julia_in_parallel(size, xmin, xmax, ymin, ymax, patch, nprocs, c):
     julia = np.zeros((size, size))
 
     with Pool(nprocs) as pool:
-        for x_start, x_end, y_start, y_end, res in pool.map(compute_julia_worker, task_list):
+        for x_start, x_end, y_start, y_end, res in pool.map(compute_julia_worker, task_list, 1):
             julia[x_start:x_end, y_start:y_end] = res
     return julia
 
