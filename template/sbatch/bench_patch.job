@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH -p q_student
+#SBATCH -N 1
+#SBATCH -c 32
+#SBATCH -t 5
+#SBATCH -o bench_patch_%j.out
+
+SCRIPT="bopc/julia_set/julia_par.py"
+SIZE=880
+NPROCS=32
+REPS=3
+PATCHES="1 5 10 20 55 150 400"
+CSV="results_patch_${SLURM_JOB_ID}.csv"
+
+echo "size,patch,nprocs,runtime,rep" > "$CSV"
+
+for patch in $PATCHES; do
+    for rep in $(seq 1 $REPS); do
+        OUT=$(python3 "$SCRIPT" --size "$SIZE" --patch "$patch" --nprocs "$NPROCS")
+        # OUT is "size;patch;nprocs;runtime"; convert to CSV and append rep.
+        echo "${OUT//;/,},${rep}" >> "$CSV"
+    done
+done
+
+echo "Done. Wrote $CSV"

@@ -1,0 +1,90 @@
+% Auto-generated section for Assignment 2.2.
+% Required packages in the main document:
+%     \usepackage{booktabs}
+%     \usepackage{float}        % for [H] placement on figures
+%     \usepackage{pgfplots}
+%     \pgfplotsset{compat=1.18}
+%
+% Required \def lines in the main document (update to match the data!):
+%     \def\sizes{120}
+%     \def\sizel{1030}
+
+\subsubsection*{Plots for $c = c_b$ (benchmark)}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cb_mean_runtime.tex}
+\caption{Mean runtime versus number of workers for $c = c_b$. As we can see, the mean runtime for large problem sizes is much larger at the beginning and thus dwarfes the graph for smaller runtimes. We can also implicitly see that the relative speedup is better for larger problem sizes.}
+\label{fig:cb-runtime}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cb_speedup.tex}
+  \caption{Relative speed-up versus number of workers for $c = c_b$. In the ideal case, we would expect a linear scaling $S(p)=p$. However, due to computational overhead, this is not the case. As already mentioned in the caption of figure ~\ref{fig:cb-runtime}, larger problem sizes have a better relative speed up because the overhead costs amortize.}
+\label{fig:cb-speedup}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cb_efficiency.tex}
+\caption{Parallel efficiency versus number of workers for $c = c_b$. The paralell efficiency of small problem sizes drops concerningly low very quickly. Large problem sizes are using more cores more efficiently.}
+\label{fig:cb-efficiency}
+\end{figure}
+
+
+\subsubsection*{Plots for $c = c_s$ (student)}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cs_mean_runtime.tex}
+\caption{Mean runtime versus number of workers for $c = c_s$. Similar to the case of $c = c_b$.}
+\label{fig:cs-runtime}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cs_speedup.tex}
+\caption{Relative speed-up versus number of workers for $c = c_s$. Similar to the case of $c = c_b$.}
+\label{fig:cs-speedup}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_cs_efficiency.tex}
+\caption{Parallel efficiency versus number of workers for $c = c_s$. Similar to the case of $c = c_b$.}
+\label{fig:cs-efficiency}
+\end{figure}
+
+
+\subsubsection*{Comparison of $c_b$ and $c_s$}
+
+\noindent $c_s$ and $c_b$ deliver similar results. This is expected, since the calculation of $c_s$ in \verb|julia_curve.py| based on the group size and TUWEL number makes sure that the computational work per pixel is roughly comparable. 
+
+
+\subsection{Influence of patch size}
+
+\input{report_assets/table_patch_influence.tex}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_patch_influence.tex}
+\caption{Mean runtime versus patch size for $c = c_s$, $size = 880$, $p = 32$.
+  As we can see, the mean runtime drops significantly for patch sizes that are only a litle bit larger than 1. This is because very small patch sizes lead to large overhead. However, at the larger end for patch sizes we see an increase in mean runtime. This might be due to load balancing, since some workers finish earlier, because there are not enough patches for a comparatively small image.}
+\label{fig:patch-influence}
+\end{figure}
+
+\subsection{Finding the best patch size} 
+
+\input{report_assets/table_patch_optimal.tex}
+
+\begin{figure}[H]
+\centering
+\input{report_assets/plot_patch_optimal.tex}
+\caption{Mean runtime versus patch size for $c = c_s$, $size = 900$, $p = 20$,
+fine sweep over $\text{patch} \in [20, 60]$. The empirical analysis suggests that the ideal patch size is 27. However, the data seems quite noisy. Furthermore, the difference in the mean runtime is not significant.}
+\label{fig:patch-optimal}
+\end{figure}
+
+

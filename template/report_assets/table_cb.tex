@@ -1,0 +1,24 @@
+\begin{table}[htb]
+ \centering
+\caption{\label{tab:runtime_cb}Runtime and speed-up of parallel Julia set generator for $c_b$ case.}
+\begin{tabular}{rrrrr}
+  \toprule
+  size & p & mean runtime (s) & speed-up & par. eff.\\
+  \midrule
+  \sizes & 1 & 0.1692 & 1.000 & 1.000 \\
+  \sizes & 2 & 0.0921 & 1.838 & 0.919 \\
+  \sizes & 4 & 0.0609 & 2.778 & 0.694 \\
+  \sizes & 8 & 0.0472 & 3.582 & 0.448 \\
+  \sizes & 16 & 0.0544 & 3.108 & 0.194 \\
+  \sizes & 24 & 0.0658 & 2.572 & 0.107 \\
+  \sizes & 32 & 0.0777 & 2.178 & 0.068 \\
+  \sizel & 1 & 11.7121 & 1.000 & 1.000 \\
+  \sizel & 2 & 5.7853 & 2.024 & 1.012 \\
+  \sizel & 4 & 2.9386 & 3.986 & 0.996 \\
+  \sizel & 8 & 1.4778 & 7.925 & 0.991 \\
+  \sizel & 16 & 0.7890 & 14.845 & 0.928 \\
+  \sizel & 24 & 0.5766 & 20.311 & 0.846 \\
+  \sizel & 32 & 0.5062 & 23.139 & 0.723 \\
+  \bottomrule
+\end{tabular}
+\end{table}

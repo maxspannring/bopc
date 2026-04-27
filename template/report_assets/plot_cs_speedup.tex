@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Number of workers $p$},
+    ylabel={Relative speed-up},
+    title={$c_s$},
+    legend pos=north east,
+    grid=major,
+    width=0.85\linewidth,
+    height=6cm,
+    xtick={1,2,4,8,16,24,32},
+]
+\addplot[blue, dotted, thick, mark=star, mark size=3pt]
+    table[x=nprocs, y=speedup] {report_assets/pgfdata/cs_120.dat};
+\addlegendentry{size = 120}
+\addplot[red, dotted, thick, mark=star, mark size=3pt]
+    table[x=nprocs, y=speedup] {report_assets/pgfdata/cs_1030.dat};
+\addlegendentry{size = 1030}
+\end{axis}
+\end{tikzpicture}

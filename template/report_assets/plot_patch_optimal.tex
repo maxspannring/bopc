@@ -1,0 +1,16 @@
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Patch size},
+    ylabel={Mean runtime (s)},
+    title={$c_s$, size = 900, $p = 20$},
+    xmin=20, xmax=60,
+    xtick distance=5,
+    minor x tick num=4,
+    grid=major,
+    width=0.85\linewidth,
+    height=6cm,
+]
+\addplot[black, dotted, thick, mark=star, mark size=3pt]
+    table[x=patch, y=mean_runtime] {report_assets/pgfdata/patch_optimal.dat};
+\end{axis}
+\end{tikzpicture}

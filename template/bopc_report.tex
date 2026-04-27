@@ -8,6 +8,12 @@ headings=normal,
 \usepackage{bopc}
 \usepackage{csvsimple}
 \usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}              % for [H] placement
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+
 %% ==================== ADAPT ACCORDINGLY ==================== %%
 
 % args: first name, last name, matriculation number
@@ -38,49 +44,19 @@ headings=normal,
 \setcounter{subsection}{1}
 \subsection{Compute Speed-up and Parallel Efficiency for 2 Instance Sizes }
 
-\def\sizes{155}
-\def\sizel{1100}
+The following results were obtained when computing the speed-up and paralell efficiency for 2 instance sizes:
 
-\begin{table}[htb]
- \centering 
-\caption{\label{tab:runtime_cs}Runtime and speed-up of parallel Julia set generator for $c_s$ case.}
-\begin{tabular}{rrrrr}
-  \toprule
-  size & p & mean runtime (s) & speed-up & par. eff.\\
-  \midrule
-  \sizes & 1 & 4.3 & fill & fill \\
-    & $\vdots$ &  & .. & .. \\
-  \sizes & 32 & 5.1 &  \\
-  \sizel & 1 & 6.3 \\
-    & $\vdots$ &  \\
-  \sizel & 32 & 6.1 \\
-  \bottomrule
-\end{tabular}
-\end{table}
+\def\sizes{120}
+\def\sizel{1030}
 
-\begin{table}[htb]
- \centering 
-\caption{\label{tab:runtime_cb}Runtime and speed-up of parallel Julia set generator for $c_b$ case.}
-\begin{tabular}{rrrrr}
-  \toprule
-  size & p & mean runtime (s) & speed-up & par. eff.\\
-  \midrule
-  \sizes & 1 & 4.3 & fill & fill \\
-    & $\vdots$ &  & .. & .. \\
-  \sizes & 32 & 5.1 &  \\
-  \sizel & 1 & 6.3 \\
-    & $\vdots$ &  \\
-  \sizel & 32 & 6.1 \\
-  \bottomrule
-\end{tabular}
-\end{table}
+\input{report_assets/table_cs.tex}
+
+\input{report_assets/table_cb.tex}
 
 Tables~\ref{tab:runtime_cs} and \ref{tab:runtime_cb} present the parallel runtime measurements and the respective speed-up and efficiency values for the cases $c_s$ and $c_b$.
 
-
-\subsection{Influence of Patch Size}
-
-\subsection{Finding the Best Patch Size}
+The following plots ~\ref{fig:cb-runtime} to ~\ref{fig:cs-efficiency} visualize the results from tables~\ref{tab:runtime_cs} and \ref{tab:runtime_cb}:
+\input{report_assets/report_section.tex}
 
 \section{Speed-up Analysis}
 
