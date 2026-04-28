@@ -62,7 +62,7 @@ The following plots ~\ref{fig:cb-runtime} to ~\ref{fig:cs-efficiency} visualize 
 
 Two algorithms $A_1, A_2$ are given with the following parallel runtimes:
 \[T_{par}^{A_1}(n,p) \in O(\frac{n \log n}{p} + \log^2(n)),\]
-\[T_{par}^{A_2}(n,p) \in O(\frac{n \log n}{p} + 3\cdot n.\]
+\[T_{par}^{A_2}(n,p) \in O(\frac{n \log n}{p} + 3\cdot n).\]
 
 The sequential time for both is defined as $T_{seq}^*(n) \in O(n\log n)$.\\
 
@@ -83,7 +83,7 @@ Table \ref{speedup_table} shows the different \textit{absolute speed-ups} for $n
 	\caption{\label{speedup_table}Absolute speed-up of algorithms with fixed n = 500 by number of cores.}
 	\begin{tabular}{rrrr}
 		\toprule
-		 p & 4 & 16 & 64 \\
+		 & p = 4 & p = 16 & p = 64 \\
 		\midrule
 		$S_a^{A_1}$ & 3.81 & 13.35 & 35.65  \\
 		$S_a^{A_2}$ & 1.36 & 1.83 & 2.00  \\
@@ -111,7 +111,7 @@ The absolute speed-up alone does not quantify the gain from parallelizing a code
 	\caption{\label{efficiency_table}Parallel efficiency of algorithms with fixed n = 500 by number of cores.}
 	\begin{tabular}{rrrr}
 		\toprule
-		p & 4 & 16 & 64 \\
+		& p = 4 & p = 16 & p = 64 \\
 		\midrule
 		$S_a^{A_1}$ & 0.95 & 0.83 & 0.56  \\
 		$S_a^{A_2}$ & 0.34 & 0.11 & 0.03  \\
