@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1777460210.14508 "bopc_report.tex" "bopc_report.pdf" "bopc_report" 1777460212.16126 2
+["pdflatex"] 1777468642.06326 "bopc_report.tex" "bopc_report.pdf" "bopc_report" 1777468644.8636 2
   "../results_optimal.csv" 1777303832.94273 3826 7467a0b85d59d20b7ed1bb248de2841c ""
   "../results_patch.csv" 1777303832.32872 675 50e1864273dfa9dcaa55d054b834f909 ""
   "../results_speedup_5118230.csv" 1777293489.72879 3414 c0854068fa4721616684b527f8b067bc ""
@@ -259,12 +259,12 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1777296561.00373 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1777296601 8214651 87ba510e6a04558d72b414e37d3c9b13 ""
   "bopc.sty" 1776775907.51965 3877 579c33daa7a0d7ea14f9f722a0fc26b3 ""
-  "bopc_report.aux" 1777460212.03676 13639 2075b87e8f70d6278db7b5295be3677a "pdflatex"
-  "bopc_report.out" 1777460211.25975 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "bopc_report.tex" 1777459663.96635 6705 870e66b7c77a331a30d6374acc6a351c ""
-  "figs/efficiency-figure.png" 1777283736.20867 34702 3765eb1183f5cb3a76a69e61a03e17f6 ""
+  "bopc_report.aux" 1777468644.70475 13625 8b04507a951683421eed142a554226ab "pdflatex"
+  "bopc_report.out" 1777468643.66277 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "bopc_report.tex" 1777468632.73294 6698 4b9727593f73e9c349aaca27a75693b2 ""
+  "figs/efficiency-figure.png" 1777468632.73394 31372 5028301ab6525559adedaffbe8013288 ""
   "figs/info-logo.pdf" 1776775907.52065 11616 98fec35f01a193b604f2df41a5d05266 ""
-  "figs/speed-up-figure.png" 1777283736.20967 40997 92f768c4cb3a9fc3259e0a3c15cd6372 ""
+  "figs/speed-up-figure.png" 1777468632.73494 42095 0a61890514504ace6a931d278d4e9f02 ""
   "report_assets/pgfdata/cb_1030.dat" 1777299109.21037 249 bce1a1ce5b8d0ac0f2914671eb229b25 ""
   "report_assets/pgfdata/cb_120.dat" 1777299109.21037 245 a043948aeb20e41e846770f841008da1 ""
   "report_assets/pgfdata/cs_1030.dat" 1777299109.21137 249 ac1d889dcd026c5693d347fa744b20a2 ""
@@ -279,7 +279,7 @@
   "report_assets/plot_cs_speedup.tex" 1777299109.21237 570 9f5fb9da9f4e39af29134e276a6cceb8 ""
   "report_assets/plot_patch_influence.tex" 1777303951.1944 498 8cccb599ef737b0d4677d66ae561d5c1 ""
   "report_assets/plot_patch_optimal.tex" 1777303951.1944 423 344dfb841082724f944ece375483aaf9 ""
-  "report_assets/report_section.tex" 1777460210.03774 4348 d27df8d00848e26025650b76753f5f6a ""
+  "report_assets/report_section.tex" 1777460224.37292 4348 d27df8d00848e26025650b76753f5f6a ""
   "report_assets/table_cb.tex" 1777299109.21237 856 269582b2a4570512f4080fb4dca82135 ""
   "report_assets/table_cs.tex" 1777299109.21237 856 748525726b6f167d5dc9bd6e12bf1c9c ""
   "report_assets/table_patch_influence.tex" 1777303951.1944 500 b0cb43cc6fa43f5e6472c6d212108e10 ""
