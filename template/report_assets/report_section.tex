@@ -61,9 +61,9 @@
 \subsubsection*{Comparison of $c_b$ and $c_s$}
 
 \noindent $c_s$ and $c_b$ deliver similar results. This is expected, since the calculation of $c_s$ in \verb|julia_curve.py| based on the group size and TUWEL number makes sure that the computational work per pixel is roughly comparable. 
-
-
-\subsection{Influence of patch size}
+Both $c_s = -0.737 - 0.162i$ and $c_b = -0.2 - 0.65i$ sit just outside the Mandelbrot set boundary --- $c_s$ near the main cardioid, $c_b$ near a period-doubling bulb. As a consequence, both Julia sets contain a comparable fraction of pixels that reach $I_{\max} = 300$ and a comparable spatial distribution of expensive pixels across the viewport. This is what produces the similar absolute runtimes, speed-up curves, and efficiency curves: the parallel scaling is dominated by load imbalance across patches, which depends on image-domain geometry rather than on the specific value of $c$.
+\newpage
+\section{Influence of patch size}
 
 \input{report_assets/table_patch_influence.tex}
 
@@ -75,7 +75,7 @@
 \label{fig:patch-influence}
 \end{figure}
 
-\subsection{Finding the best patch size} 
+\section{Finding the best patch size} 
 
 \input{report_assets/table_patch_optimal.tex}
 

@@ -1,10 +1,23 @@
-\begin{table}[H]
- \centering
-\caption{\label{tab:patch_optimal}Mean runtime as a function of patch size, with $size = 900$ and $p = 20$, three repetitions per configuration.}
-\begin{tabular}{rrrr}
+\begin{longtable}{rrrr}
+  \caption{\label{tab:patch_optimal}Mean runtime as a function of patch size, with $size = 900$ and $p = 20$, three repetitions per configuration.}\\
   \toprule
   size & p & patch & mean runtime (s)\\
   \midrule
+  \endfirsthead
+
+  \multicolumn{4}{l}{\small\itshape continued from previous page}\\
+  \toprule
+  size & p & patch & mean runtime (s)\\
+  \midrule
+  \endhead
+
+  \midrule
+  \multicolumn{4}{r}{\small\itshape continued on next page}\\
+  \endfoot
+
+  \bottomrule
+  \endlastfoot
+
   900 & 20 & 20 & 0.5431 \\
   900 & 20 & 21 & 0.5481 \\
   900 & 20 & 22 & 0.5438 \\
@@ -46,6 +59,4 @@
   900 & 20 & 58 & 0.6090 \\
   900 & 20 & 59 & 0.5912 \\
   900 & 20 & 60 & 0.5873 \\
-  \bottomrule
-\end{tabular}
-\end{table}
+\end{longtable}
