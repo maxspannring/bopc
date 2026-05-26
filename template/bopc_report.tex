@@ -1,0 +1,217 @@
+\documentclass[a4paper,%
+11pt,%
+DIV12,
+headsepline,%
+headings=normal,
+]{scrartcl}
+
+\usepackage{bopc}
+\usepackage{csvsimple}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+
+%% Paths relative to this template/ directory
+\newcommand{\resultpath}{../julia_cuda/results}
+\newcommand{\plotpath}{../julia_cuda/plots}
+
+%% ==================== ADAPT ACCORDINGLY ==================== %%
+
+% args: first name, last name, matriculation number
+\setAuthorOne{Ida}{Neuhauser}{11806595}
+\setAuthorTwo{Max}{Spannring}{12104980}
+
+% set group size and group number, group size influences author formatting
+
+% args: group size, group number (TUWEL)
+\setGroup{2}{1}
+%\setGroup{2}{X}
+
+%% =========================================================== %%
+
+\begin{document}
+
+\maketitlepage
+
+%% ================= SUBMISSION INFORMATION ================== %%
+
+% Please fill out accordingly
+
+%% ========================= REPORT ========================== %%
+
+\section{Exercise 1}
+
+\subsection{What do \texttt{a} and \texttt{t} count?}
+
+\subsection{Values for all elements in \texttt{a} and \texttt{t}}
+
+\section{Exercise 2}
+
+\subsection{Optimal Schedule}
+
+\subsection{Schedule \texttt{static,3}}
+
+\subsection{Schedule \texttt{dynamic,2}}
+
+\section{Exercise 3}
+
+\subsection{What is the output of the three different versions?}
+
+\subsection{How often is the function \texttt{omp\_tasks} called?}
+
+\section{Exercise 4}
+
+\subsection{Parallelize the pixel computation}
+
+\subsection{Running time analysis}
+
+\subsection{Influence of schedule parameter}
+
+\section{Exercise 5}
+
+\subsection{Parallelize the filter computation}
+
+\subsection{Strong scaling analysis}
+
+\subsection{Weak scaling analysis}
+
+\section{Exercise 6}
+
+%% ------------------------------------------------------------------
+\subsection{Convert OpenMP code to CUDA}
+The \verb|kernel_gpu.cu| file has been modified in order to compute Jula sets on the GPU. We replaced the empty stub with three pieces: a \texttt{\_\_device\_\_} copy of \texttt{checkPointForJuliaSet} (the per-pixel escape-time loop, body unchanged from \texttt{kernel\_cpu.cpp}), a \texttt{\_\_global\_\_} kernel \texttt{julia\_kernel\_device} that derives its $(x, y)$ from \texttt{blockIdx}/\texttt{blockDim}/\texttt{threadIdx} and computes one pixel per thread, and a host-side \texttt{julia\_kernel} wrapper that picks a default $16 \times 16$ block size (or honors \texttt{--blocksize}), does \texttt{cudaMalloc} $\rightarrow$ kernel launch $\rightarrow$ \texttt{cudaMemcpy} back to the host buffer $\rightarrow$ \texttt{cudaFree}. The doubly-nested CPU loop disappears entirely --- its iterations are now expressed as the grid of threads launched on the GPU, with a bounds check inside the kernel to handle the case where the grid slightly over-covers the image.
+
+%% ------------------------------------------------------------------
+\subsection{Running time analysis}
+\label{sec:ex6-subtask2}
+In this task, we had to run the CUDA programm on the GPU for different resoltutions. The default blok size of 16x16 and nrep=5 was used. 
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, default block size 16x16, nrep=5
+%   Resolutions: 1000, 2000, 4000, 8000, 16000 (square images)
+%   Hardware: Tesla T4 (CC 7.5), CUDA 12.4
+%   Rep 0 includes CUDA context initialisation; reps 1-4 are steady-state.
+%
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask2.png}
+  \caption{GPU kernel time vs.\ resolution (default $16{\times}16$ block size,
+    $\texttt{nrep}=5$).
+    \emph{Red}: maximum time across 5 reps (rep~0, includes CUDA context
+    initialisation).
+    \emph{Blue}: average steady-state time (reps~1--4).}
+  \label{fig:subtask2}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~2: GPU timing vs.\ resolution.
+           \texttt{avg\_steady\_s} excludes rep~0 (init-dominated).}
+  \label{tab:subtask2}
+  \small
+  \begin{tabular}{rrrr}
+    \toprule
+    Resolution & Avg steady (s) & Max (s) & Speedup vs.\ 1\,000 \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask2/subtask2_summary.csv}{}%
+    {\resolution & \avgsteadys & \maxs & \speedupvsk}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Rep 0 is always the max and is dominated by CUDA context initialization. The remaining reps scale closely to $O(N^2)$
+
+%% ------------------------------------------------------------------
+\subsection{Impact of block size}
+\label{sec:ex6-subtask3}
+Now we fix the resolution to 2000x2000, and try out different block sizes. We can see that (1, 32) is the best block size. The output array is indexed as \texttt{julia\_set[x*res\_y + y]}, so adjacent values of \texttt{y} occupy adjacent memory locations. With block shape $(1, 32)$, all 32 threads in a warp share the same \texttt{x} but have consecutive \texttt{y} values, mapping to consecutive memory addresses --- the warp issues a single 128-byte L1 transaction (a fully coalesced write). With block shape $(32, 1)$, by contrast, threads share the same \texttt{y} but have consecutive \texttt{x} values, so their target addresses lie \texttt{res\_y} floats ($= 80\,000$~bytes) apart. The warp must then issue 32 separate L1 transactions, one per thread (fully non-coalesced).
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, r=20000x20000, nrep=5
+%   Block sizes: (1,1), (32,1), (1,32), (128,1), (1024,1)
+%   Profiler: ncu (Nsight Compute 2024.1.1) -- nvprof unsupported on CC >= 7.5
+%   Metrics: achieved occupancy, global store throughput (L1 pipe),
+%            warp thread instruction efficiency
+%   BEST_BLOCK = (1,32), avg steady-state 0.337 s
+%
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask3.png}
+  \caption{Average steady-state GPU time per block size
+    ($r=20\,000{\times}20\,000$, $\texttt{nrep}=5$, reps~1--4).
+    Best configuration (block $1{\times}32$) highlighted in green.}
+  \label{fig:subtask3}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~3: timing and ncu profiler metrics per block size
+    ($r=20\,000{\times}20\,000$).
+    GST = global store throughput (L1 texture pipe).
+    Warp eff = mean active threads per warp instruction (max 32).}
+  \label{tab:subtask3}
+  \small
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Block & Threads & Avg (s) & Occupancy (\%) & GST (GB/s) & Warp eff \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask3/subtask3_summary.csv}{}%
+    {\block & \threads & \avgsteadys & \occupancypct & \gstGBs & \warpeff}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+%% ------------------------------------------------------------------
+\subsection{Running time: CPU vs.\ GPU}
+\label{sec:ex6-subtask4}
+
+For this subtask, we want to copare the running time of the code on the CPU vs the GPU. We can see that there is no crossover - the GPU wins in every measured case. 
+However, we can see that the code runtime scales similarly for both the CPU and GPU version. 
+
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, block (1,32) = BEST_BLOCK, nrep=5
+%   CPU: juliaset_cpu, OMP_NUM_THREADS=32 (nproc on tesla node)
+%   Resolutions: 1000, 2000, 4000, 8000, 16000 (square images)
+%   No crossover detected in steady-state [1000, 16000]: GPU always faster
+%
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask4.png}
+  \caption{CPU vs.\ GPU average steady-state time vs.\ resolution
+    (log--log scale, $\texttt{nrep}=5$, reps~1--4).
+    GPU uses best block $(1{\times}32)$; CPU uses
+    \texttt{OMP\_NUM\_THREADS=32}.
+    No crossover was detected in the measured resolution range.}
+  \label{fig:subtask4}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~4: CPU vs.\ GPU average steady-state time and speedup.
+           Speedup $= t_\text{CPU} / t_\text{GPU}$.}
+  \label{tab:subtask4}
+  \small
+  \begin{tabular}{rrrr}
+    \toprule
+    Resolution & GPU avg (s) & CPU avg (s) & Speedup \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask4/subtask4_summary.csv}{}%
+    {\resolution & \gpuavgs & \cpuavgs & \speedup}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}

@@ -1,0 +1,16 @@
+==PROF== Connected to process 58612 (/home/student/pc26s55/juliaset_gpu)
+==PROF== Profiling "julia_kernel_device" - 0: 0%....50%==WARNING== Launching the workload is taking more time than expected. If this continues to hang, terminate the profile and re-try by profiling the range of all related launches using '--replay-mode range'. See https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#replay for more details.
+....100% - 1 pass
+==PROF== Disconnected from process 58612
+[58612] juliaset_gpu@127.0.0.1
+  julia_kernel_device(float *, Complex, float, int, int, int, float, float, float) (20000, 20000, 1)x(1, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Section: Command line profiler metrics
+    ------------------------------------------------------- ------------ ------------
+    Metric Name                                              Metric Unit Metric Value
+    ------------------------------------------------------- ------------ ------------
+    l1tex__t_bytes_pipe_lsu_mem_global_op_ld.sum.per_second  byte/second            0
+    l1tex__t_bytes_pipe_lsu_mem_global_op_st.sum.per_second Gbyte/second         2,16
+    sm__warps_active.avg.pct_of_peak_sustained_active                  %        48,60
+    smsp__thread_inst_executed_per_inst_executed.ratio                              1
+    ------------------------------------------------------- ------------ ------------
+

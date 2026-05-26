@@ -1,0 +1,206 @@
+\documentclass[a4paper,%
+11pt,%
+DIV12,
+headsepline,%
+headings=normal,
+]{scrartcl}
+
+\usepackage{bopc}
+\usepackage{csvsimple}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+
+%% ==================== ADAPT ACCORDINGLY ==================== %%
+
+% args: first name, last name, matriculation number
+\setAuthorOne{Jane}{Doe}{12012345}
+\setAuthorTwo{John}{Roe}{12112345}
+\setAuthorThree{Max}{Min}{14312345}
+
+% args: group size, group number (TUWEL)
+\setGroup{3}{X}
+
+%% =========================================================== %%
+
+%% Convenience path macros
+\newcommand{\resultpath}{../results}
+\newcommand{\plotpath}{../plots}
+
+\begin{document}
+
+\maketitlepage
+
+%% =================== EXERCISE 6 ONLY ==================== %%
+
+\section{Exercise 6}
+
+%% ------------------------------------------------------------------
+\subsection{Convert OpenMP code to CUDA}
+
+% No benchmarking content for subtask 1.
+% Add code-level description / explanation here if required.
+
+%% ------------------------------------------------------------------
+\subsection{Running time analysis}
+\label{sec:ex6-subtask2}
+
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, default block size 16x16, nrep=5
+%   Resolutions: 1000, 2000, 4000, 8000, 16000 (square images)
+%   Hardware: Tesla T4, CUDA 12.4
+%   Rep 0 includes CUDA context initialisation; reps 1-4 are steady-state.
+%
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask2.png}
+  \caption{GPU kernel time vs.\ resolution (default $16{\times}16$ block size,
+    $\texttt{nrep}=5$).
+    \emph{Red}: maximum time across 5 reps (rep~0, includes CUDA context
+    initialisation).
+    \emph{Blue}: average steady-state time (reps~1--4).}
+  \label{fig:subtask2}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~2 summary: GPU timing vs.\ resolution.
+           \texttt{avg\_steady\_s} excludes rep~0 (init-dominated).}
+  \label{tab:subtask2}
+  \begin{tabular}{rrrr}
+    \toprule
+    Resolution & Avg steady (s) & Max (s) & Speedup vs.\ 1\,000 \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask2/subtask2_summary.csv}{}%
+    {\resolution & \avgsteadys & \maxs & \speedupvsk}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% TODO: discussion
+% KEYWORDS:
+%   - steady-state time scales ~4x when resolution doubles (pixels 4x):
+%     confirms per-pixel cost dominates at large N
+%   - max (rep 0) is nearly flat across resolutions (~250-760 ms):
+%     dominated by fixed CUDA context init + cudaMalloc, not pixel count
+%   - asymptote: as N -> inf, avg/max -> 1 (init amortised away)
+%   - why max > avg: warm-up / context init on first kernel launch per process
+
+%% ------------------------------------------------------------------
+\subsection{Impact of block size}
+\label{sec:ex6-subtask3}
+
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, r=20000x20000, nrep=5
+%   Block sizes: (1,1), (32,1), (1,32), (128,1), (1024,1)
+%   Profiler: ncu (Nsight Compute 2024.1.1) — nvprof unsupported on CC 7.5
+%   Metrics: achieved occupancy, global store throughput (L1 pipe),
+%            warp thread instruction efficiency
+%
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask3.png}
+  \caption{Average steady-state GPU time per block size
+    ($r=20\,000{\times}20\,000$, $\texttt{nrep}=5$, reps~1--4).
+    Best configuration highlighted in green.}
+  \label{fig:subtask3}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~3 summary: timing and ncu profiler metrics per block size.
+           GST = global store throughput (L1 texture pipe).
+           Warp eff = active threads per warp-instruction (max 32).}
+  \label{tab:subtask3}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Block & Threads & Avg (s) & Occupancy (\%) & GST (GB/s) & Warp eff \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask3/subtask3_summary.csv}{}%
+    {\block & \threads & \avgsteadys & \occupancypct & \gstGBs & \warpeff}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% TODO: discussion
+% KEYWORDS:
+%   - indexing julia_set[x*res_y + y]: consecutive y = consecutive addresses
+%     => (1,32) threads vary y within warp => coalesced global store (1 transaction/warp)
+%     => (32,1) threads vary x => stride res_y=20000 => 32 transactions/warp (non-coalesced)
+%   - (1,32) wins despite lower L1-pipe throughput metric: high GST for (32,1)
+%     reflects wasted cache-line fill traffic, not useful DRAM bandwidth
+%   - warp size 32: (1,1) uses 1/32 warp lanes => warp_eff=1 (3% utilisation);
+%     all other configs fill full warps
+%   - (1,1) is 7x slower: both 1/32 lane utilisation AND non-coalesced stores
+%   - (128,1) has highest occupancy (81%) but is 21% slower than (1,32):
+%     occupancy alone does not predict performance when memory coalescing limits
+%   - global loads = 0: kernel only WRITES julia_set; c and params in registers
+%   - achieved vs theoretical occupancy: (1,32) 49% actual vs 100% theoretical
+%     (limited by warp scheduling, not register/smem)
+
+%% ------------------------------------------------------------------
+\subsection{Running time: CPU vs.\ GPU}
+\label{sec:ex6-subtask4}
+
+%
+% Measurement setup:
+%   GPU: juliaset_gpu, block (1,32), nrep=5
+%   CPU: juliaset_cpu, OMP_NUM_THREADS=<nproc on tesla node>
+%   Resolutions: 1000, 2000, 4000, 8000, 16000
+%   nproc recorded at job runtime: see results/subtask4/job.out
+%
+
+\begin{figure}[H]
+  \centering
+  % subtask4.png generated once results/subtask4/ is populated
+  \includegraphics[width=0.85\textwidth]{\plotpath/subtask4.png}
+  \caption{CPU vs.\ GPU average steady-state time vs.\ resolution
+    (log--log scale, $\texttt{nrep}=5$, reps~1--4).
+    GPU uses best block $(1{\times}32)$; CPU uses \texttt{OMP\_NUM\_THREADS=nproc}.
+    Dashed vertical line marks the crossover resolution (if within range).}
+  \label{fig:subtask4}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Subtask~4 summary: CPU vs.\ GPU average steady-state time.
+           Speedup $= t_\text{CPU} / t_\text{GPU}$.}
+  \label{tab:subtask4}
+  \begin{tabular}{rrrr}
+    \toprule
+    Resolution & GPU avg (s) & CPU avg (s) & Speedup \\
+    \midrule
+    \csvreader[
+      head to column names,
+      late after line=\\,
+    ]{\resultpath/subtask4/subtask4_summary.csv}{}%
+    {\resolution & \gpuavgs & \cpuavgs & \speedup}%
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% TODO: discussion
+% KEYWORDS:
+%   - crossover point: GPU overhead (cudaMalloc + memcpy ~250 ms fixed cost)
+%     dominates at small N; CPU wins below crossover
+%   - at large N: GPU scales ~O(N^2) with high parallelism => GPU wins
+%   - CPU baseline depends on OMP_NUM_THREADS (record exact nproc value);
+%     more threads => lower CPU time => pushes crossover to larger N
+%   - GPU has constant overhead regardless of resolution:
+%     cudaMalloc + H2D memcpy ~0 here (output only) + D2H memcpy ~O(N^2)
+%   - both axes log-scale: straight-line slopes reveal power-law scaling
+%   - if no crossover in [1000,16000]: note GPU is always faster or always slower
+%     and extrapolate where crossing would occur
+
+\end{document}
