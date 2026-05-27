@@ -42,38 +42,114 @@ headings=normal,
 \section{Exercise 1}
 
 \subsection{What do \texttt{a} and \texttt{t} count?}
+In the given loop, \texttt{a} records which thread executes at the current iteration, and \texttt{t} counts how many tasks a thread is assigned.
 
 \subsection{Values for all elements in \texttt{a} and \texttt{t}}
 
+\begin{tabular}{cccccccccccccccc}
+	\hline
+	case / \textit{a}& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 \\
+	\hline
+	static& 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 \\
+	
+	static,2& 0 & 0 & 1 & 1 & 2 & 2 & 0 & 0 & 1 & 1 & 2 & 2 & 0 & 0 & 1 \\
+	
+	static,3& 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 0 & 0 & 0 & 1 & 1 & 1\\
+	
+	dynamic,1& 0 & 1 & 1 & 0 & 2 & 2 & 2 & 1 & 2 & 0 & 0 & 1 & 0 & 0 & 0 \\
+	
+	dynamic,4& 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 1 & 1 & 1 & 1 & 0 & 0 & 0 \\
+	
+	guided,7& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 2 \\
+	\hline
+\end{tabular}
+
+
+\begin{tabular}{rccc}
+	\hline
+	case / \textit{t} & 0 & 1 & 2 \\
+	\hline
+	static & 5 & 5 & 5 \\
+
+	static,2 & 6 & 5 & 4 \\
+
+	static,3 & 6 & 6 & 3 \\
+
+	dynamic,1 & 7 & 4 & 4 \\
+
+	dynamic,4 & 3 & 8 & 4 \\
+
+	guided,7 & 7 & 7 & 1 \\
+	\hline
+\end{tabular}
 \section{Exercise 2}
 
 \subsection{Optimal Schedule}
+Since the workload in total is 56, it is distributed equally across the cores, each has a workload of 14. Figure \ref{fig:2a} shows a possible assignment, core 1 and core 2 do two larger tasks, core 3 gets assigned five medium sized tasks and core 4 does nine medium to smaller tasks. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{figs/2a}
+	\caption[]{Schedule with optimal load balancing.}
+	\label{fig:2a}
+\end{figure}
 
 \subsection{Schedule \texttt{static,3}}
+Using \texttt{static,3}, the workload is unbalanced. Core 1 and 2 get two packages, cores 3 and 4 only one (Figure \ref{fig:2b}). This leads to a makespan of 22.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{figs/2b}
+	\caption{Schedule with \texttt{static,3} assignment.}
+	\label{fig:2b}
+\end{figure}
+
 
 \subsection{Schedule \texttt{dynamic,2}}
+For the \texttt{dynamic,2} schedule shown in Figure \ref{fig:2c}, the package was assigned to the earliest free core, which leads to a makespan of 21.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{figs/2c}
+	\caption{Schedule with \texttt{dynamic,2} assignment.}
+	\label{fig:2c}
+\end{figure}
+
 
 \section{Exercise 3}
 
 \subsection{What is the output of the three different versions?}
 
+The different \texttt{\#pragma} functions only affect which thread executes what task, not the numerical computation. Therefore, res = 5 for \textsc{Version A}, \textsc{Version B} and \textsc{Version C}.
+
+\begin{itemize}
+	\item[Version A] res = 5. There is no race because each task writes a different variable and \texttt{\#pragma omp taskwait} ensures that the parent thread does not read \texttt{a} and \texttt{b} before the writing is finished.
+	\item[Version B] res = 5. Same as before, different tasks write to different variables and finish writing before they are read for \texttt{return}. One thread starts \texttt{res = omp\_tasks(5)}, the other threads work on tasks from \texttt{\#pragma omp task shared}.
+	\item[Version C] res = 5. Each thread executes \texttt{res = omp\_tasks(5)} and overwrites the value, but the result is the same each time. 
+\end{itemize}  
+
 \subsection{How often is the function \texttt{omp\_tasks} called?}
 
-\section{Exercise 4}
+For each v $\leq$ 2, \texttt{omp\_tasks = OT} is called once, for all larger v, it the number of calls depends on the two previous numbers. \\
+OT(5) needs\\
+\hspace*{5mm} OT(4) needs\\
+\hspace*{10mm} OT(3) needs\\
+\hspace*{15mm} OT(2)\\
+\hspace*{15mm} OT(1)\\
+\hspace*{10mm} OT(2)\\
+\hspace*{5mm} OT(3) needs\\
+\hspace*{10mm} OT(2)\\
+\hspace*{10mm} OT(1)\\
 
-\subsection{Parallelize the pixel computation}
-
-\subsection{Running time analysis}
-
-\subsection{Influence of schedule parameter}
-
-\section{Exercise 5}
-
-\subsection{Parallelize the filter computation}
-
-\subsection{Strong scaling analysis}
-
-\subsection{Weak scaling analysis}
+\begin{itemize}
+	\item[Version A] \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times.
+	
+	\item[Version B] Same as in Version A, \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times. \texttt{single nowait} and \texttt{task shared (b)} only affect which thread executes what and does not change the number of executions.
+	
+	\item [Version C] Because of \texttt{\#pragma omp critical}, each thread executes \texttt{res = omp\_tasks(5)}. Thus, \texttt{omp\_tasks} gets called $ 3 \cdot 9 = 27$ times. 
+	
+	
+\end{itemize}
 
 \section{Exercise 6}
 
@@ -84,7 +160,7 @@ The \verb|kernel_gpu.cu| file has been modified in order to compute Jula sets on
 %% ------------------------------------------------------------------
 \subsection{Running time analysis}
 \label{sec:ex6-subtask2}
-In this task, we had to run the CUDA programm on the GPU for different resoltutions. The default blok size of 16x16 and nrep=5 was used. 
+In this task, we had to run the CUDA programm on the GPU for different resoltutions. The default block size of 16x16 and nrep=5 was used. 
 %
 % Measurement setup:
 %   GPU: juliaset_gpu, default block size 16x16, nrep=5
