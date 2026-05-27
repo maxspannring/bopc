@@ -123,9 +123,9 @@ For the \texttt{dynamic,2} schedule shown in Figure \ref{fig:2c}, the package wa
 The different \texttt{\#pragma} functions only affect which thread executes what task, not the numerical computation. Therefore, res = 5 for \textsc{Version A}, \textsc{Version B} and \textsc{Version C}.
 
 \begin{itemize}
-	\item[Version A] res = 5. There is no race because each task writes a different variable and \texttt{\#pragma omp taskwait} ensures that the parent thread does not read \texttt{a} and \texttt{b} before the writing is finished.
-	\item[Version B] res = 5. Same as before, different tasks write to different variables and finish writing before they are read for \texttt{return}. One thread starts \texttt{res = omp\_tasks(5)}, the other threads work on tasks from \texttt{\#pragma omp task shared}.
-	\item[Version C] res = 5. Each thread executes \texttt{res = omp\_tasks(5)} and overwrites the value, but the result is the same each time. 
+	\item \textsc{Version A}: res = 5. There is no race because each task writes a different variable and \texttt{\#pragma omp taskwait} ensures that the parent thread does not read \texttt{a} and \texttt{b} before the writing is finished.
+	\item \textsc{Version B}:  res = 5. Same as before, different tasks write to different variables and finish writing before they are read for \texttt{return}. One thread starts \texttt{res = omp\_tasks(5)}, the other threads work on tasks from \texttt{\#pragma omp task shared}.
+	\item \textsc{Version C}:  res = 5. Each thread executes \texttt{res = omp\_tasks(5)} and overwrites the value, but the result is the same each time. 
 \end{itemize}  
 
 \subsection{How often is the function \texttt{omp\_tasks} called?}
@@ -142,11 +142,11 @@ OT(5) needs\\
 \hspace*{10mm} OT(1)\\
 
 \begin{itemize}
-	\item[Version A] \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times.
+	\item \textsc{Version A}: \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times.
 	
-	\item[Version B] Same as in Version A, \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times. \texttt{single nowait} and \texttt{task shared (b)} only affect which thread executes what and does not change the number of executions.
+	\item \textsc{Version B}: Same as in Version A, \texttt{omp\_tasks}  gets called $ 1 \cdot OT(5) +1\cdot OT(4) +2\cdot OT(3) +3\cdot OT(2) +2\cdot OT(1)= 9$ times. \texttt{single nowait} and \texttt{task shared (b)} only affect which thread executes what and does not change the number of executions.
 	
-	\item [Version C] Because of \texttt{\#pragma omp critical}, each thread executes \texttt{res = omp\_tasks(5)}. Thus, \texttt{omp\_tasks} gets called $ 3 \cdot 9 = 27$ times. 
+	\item \textsc{Version C}: Because of \texttt{\#pragma omp critical}, each thread executes \texttt{res = omp\_tasks(5)}. Thus, \texttt{omp\_tasks} gets called $ 3 \cdot 9 = 27$ times. 
 	
 	
 \end{itemize}
@@ -171,7 +171,7 @@ In this task, we had to run the CUDA programm on the GPU for different resoltuti
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{\plotpath/subtask2.png}
+  \includegraphics[width=0.85\textwidth]{figs/subtask2.png}
   \caption{GPU kernel time vs.\ resolution (default $16{\times}16$ block size,
     $\texttt{nrep}=5$).
     \emph{Red}: maximum time across 5 reps (rep~0, includes CUDA context
@@ -217,7 +217,7 @@ Now we fix the resolution to 2000x2000, and try out different block sizes. We ca
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{\plotpath/subtask3.png}
+  \includegraphics[width=0.85\textwidth]{figs/subtask3.png}
   \caption{Average steady-state GPU time per block size
     ($r=20\,000{\times}20\,000$, $\texttt{nrep}=5$, reps~1--4).
     Best configuration (block $1{\times}32$) highlighted in green.}
@@ -262,7 +262,7 @@ However, we can see that the code runtime scales similarly for both the CPU and 
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\textwidth]{\plotpath/subtask4.png}
+  \includegraphics[width=0.85\textwidth]{figs/subtask4.png}
   \caption{CPU vs.\ GPU average steady-state time vs.\ resolution
     (log--log scale, $\texttt{nrep}=5$, reps~1--4).
     GPU uses best block $(1{\times}32)$; CPU uses
